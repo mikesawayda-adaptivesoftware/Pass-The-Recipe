@@ -1,0 +1,252 @@
+@use '@angular/material' as mat;
+
+// Required for Angular Material dialogs/menus to position correctly
+@import '@angular/cdk/overlay-prebuilt.css';
+
+// Import Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+
+// Custom theme colors
+$primary-palette: (
+  50: #fce4ec,
+  100: #f8bbd9,
+  200: #f48fb1,
+  300: #f06292,
+  400: #ec407a,
+  500: #e94560,
+  600: #d81b60,
+  700: #c2185b,
+  800: #ad1457,
+  900: #880e4f,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  )
+);
+
+$dark-palette: (
+  50: #e8eaf6,
+  100: #c5cae9,
+  200: #9fa8da,
+  300: #7986cb,
+  400: #5c6bc0,
+  500: #1a1a2e,
+  600: #16213e,
+  700: #0f3460,
+  800: #0d47a1,
+  900: #0d47a1,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  )
+);
+
+$pass-the-recipe-primary: mat.m2-define-palette($primary-palette, 500);
+$pass-the-recipe-accent: mat.m2-define-palette($dark-palette, 500);
+$pass-the-recipe-warn: mat.m2-define-palette(mat.$m2-red-palette);
+
+$pass-the-recipe-theme: mat.m2-define-light-theme((
+  color: (
+    primary: $pass-the-recipe-primary,
+    accent: $pass-the-recipe-accent,
+    warn: $pass-the-recipe-warn,
+  ),
+  typography: mat.m2-define-typography-config(
+    $font-family: '"Source Sans 3", "Helvetica Neue", sans-serif',
+  ),
+  density: 0,
+));
+
+@include mat.all-component-themes($pass-the-recipe-theme);
+
+// Global Styles
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Source Sans 3', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  min-height: 100vh;
+}
+
+// Custom scrollbar
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+
+  &:hover {
+    background: #999;
+  }
+}
+
+// Material overrides
+.mat-mdc-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.mat-mdc-raised-button.mat-primary {
+  background: linear-gradient(135deg, #e94560 0%, #c73e54 100%) !important;
+}
+
+.mat-mdc-fab.mat-primary {
+  background: linear-gradient(135deg, #e94560 0%, #c73e54 100%) !important;
+}
+
+.mat-mdc-mini-fab.mat-primary {
+  background: linear-gradient(135deg, #e94560 0%, #c73e54 100%) !important;
+}
+
+.mat-mdc-form-field-focus-overlay {
+  background-color: transparent !important;
+}
+
+// Typography helpers
+.font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+// Utility classes
+.text-center {
+  text-align: center;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Dialog visual polish (doesn't affect positioning)
+.mat-mdc-dialog-container {
+  border-radius: 16px !important;
+
+  .mat-mdc-dialog-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    padding: 1.25rem 1.5rem !important;
+    margin: 0 !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 1.5rem !important;
+    max-height: calc(90vh - 180px) !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 1rem 1.5rem !important;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+}
+
+// Recipe Card Menu Styles  
+.mat-mdc-menu-panel {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+// Profile Menu Panel Styles
+.profile-menu-panel {
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+  margin-top: 8px;
+
+  .mat-mdc-menu-content {
+    padding: 0 !important;
+  }
+
+  .mat-mdc-menu-item {
+    padding: 12px 20px;
+    min-height: 48px;
+
+    .mat-icon {
+      margin-right: 12px;
+      color: #666;
+    }
+
+    &:hover {
+      background: rgba(233, 69, 96, 0.08);
+      
+      .mat-icon {
+        color: #e94560;
+      }
+    }
+
+    &.logout-item {
+      color: #d32f2f;
+
+      .mat-icon {
+        color: #d32f2f;
+      }
+
+      &:hover {
+        background: rgba(211, 47, 47, 0.08);
+      }
+    }
+  }
+
+  .mat-mdc-menu-item-text {
+    font-size: 0.95rem;
+  }
+}

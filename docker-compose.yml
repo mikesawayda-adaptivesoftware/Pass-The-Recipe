@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # Ollama LLM for ingredient parsing
+  ollama:
+    image: ollama/ollama:latest
+    container_name: pass-the-recipe-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    # Uncomment below for Nvidia GPU support on Unraid
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  # Model loader - pulls the model on first run
+  ollama-model-loader:
+    image: ollama/ollama:latest
+    container_name: pass-the-recipe-model-loader
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Checking if model exists..."
+        if ! ollama list | grep -q "llama3.2:3b"; then
+          echo "Pulling llama3.2:3b model (this may take a few minutes on first run)..."
+          ollama pull llama3.2:3b
+          echo "Model pulled successfully!"
+        else
+          echo "Model already exists, skipping pull."
+        fi
+    restart: "no"
+
+  # Main application
+  pass-the-recipe:
+    build: .
+    container_name: pass-the-recipe
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    ports:
+      - "3084:3000"
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_PATH=/app/data/pass-the-recipe.db
+      - JWT_SECRET=${JWT_SECRET:-change-this-secret-in-production}
+      - CORS_ORIGIN=*
+      # Ingredient Parser - LLM via Ollama
+      - INGREDIENT_PARSER_TYPE=llm
+      - OLLAMA_URL=http://ollama:11434
+      - OLLAMA_MODEL=llama3.2:3b
+      - OLLAMA_TIMEOUT=30000
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/auth/profile"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  ollama_data:
+    name: pass-the-recipe-ollama-data
+

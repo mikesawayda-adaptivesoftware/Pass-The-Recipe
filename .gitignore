@@ -1,0 +1,48 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.eslintcache
+
+# Angular
+.angular/
+dist/
+tmp/
+out-tsc/
+bazel-out/
+
+# NestJS (server directory)
+server/node_modules/
+server/dist/
+server/thrift-0.13.0/
+
+# Firebase
+.firebase/
+functions/node_modules/
+functions/lib/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Database and uploads (based on README)
+data/
+uploads/
+*.db
+*.sqlite
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Misc
+mealie_modified.zip

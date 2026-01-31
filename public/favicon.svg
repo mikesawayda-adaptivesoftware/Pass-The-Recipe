@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="plateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f8f8"/>
+      <stop offset="100%" style="stop-color:#e8e8e8"/>
+    </linearGradient>
+    <linearGradient id="steamGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#e94560;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#e94560;stop-opacity:0"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Plate/Bowl -->
+  <ellipse cx="32" cy="42" rx="26" ry="10" fill="url(#plateGrad)" stroke="#e94560" stroke-width="2"/>
+  <ellipse cx="32" cy="38" rx="22" ry="8" fill="#fff" stroke="#e94560" stroke-width="1.5"/>
+  
+  <!-- Food representation (abstract) -->
+  <ellipse cx="32" cy="36" rx="16" ry="5" fill="#e94560" opacity="0.3"/>
+  
+  <!-- Fork -->
+  <g transform="translate(18, 8) rotate(15)">
+    <rect x="2" y="0" width="2" height="20" fill="#e94560" rx="1"/>
+    <rect x="0" y="0" width="1.5" height="8" fill="#e94560" rx="0.5"/>
+    <rect x="2.5" y="0" width="1.5" height="8" fill="#e94560" rx="0.5"/>
+    <rect x="5" y="0" width="1.5" height="8" fill="#e94560" rx="0.5"/>
+  </g>
+  
+  <!-- Spoon -->
+  <g transform="translate(42, 8) rotate(-15)">
+    <ellipse cx="3" cy="4" rx="4" ry="5" fill="#e94560"/>
+    <rect x="2" y="8" width="2" height="14" fill="#e94560" rx="1"/>
+  </g>
+  
+  <!-- Steam wisps -->
+  <path d="M24 18 Q26 14 24 10 Q22 6 24 2" stroke="url(#steamGrad)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M32 20 Q34 16 32 12 Q30 8 32 4" stroke="url(#steamGrad)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M40 18 Q42 14 40 10 Q38 6 40 2" stroke="url(#steamGrad)" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>
+

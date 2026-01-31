@@ -1,0 +1,58 @@
+# Node modules
+node_modules/
+server/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+server/dist/
+.angular/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Tests
+*.spec.ts
+*.e2e-spec.ts
+test/
+coverage/
+
+# Development
+*.md
+LICENSE
+.editorconfig
+.prettierrc
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Data
+data/
+uploads/
+*.db
+*.db-shm
+*.db-wal
+
+# Firebase
+firebase.json
+firestore.indexes.json
+firestore.rules
+storage.rules
+database.json
+functions/

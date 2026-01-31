@@ -22,6 +22,9 @@ FROM node:20-alpine AS backend-builder
 
 WORKDIR /app/backend
 
+# Install build dependencies for native modules (sqlite3)
+RUN apk add --no-cache python3 make g++
+
 # Copy backend package files
 COPY server/package*.json ./
 
@@ -40,9 +43,14 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# Install production dependencies for backend
+# Install build dependencies for native modules (sqlite3) and wget for healthcheck
+RUN apk add --no-cache python3 make g++ wget
+
+# Copy backend package files
 COPY server/package*.json ./
-RUN npm ci --only=production
+
+# Install production dependencies (including sqlite3 native module)
+RUN npm ci --omit=dev
 
 # Copy built backend
 COPY --from=backend-builder /app/backend/dist ./dist

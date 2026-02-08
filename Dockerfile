@@ -27,7 +27,8 @@ FROM node:20-alpine AS backend-builder
 WORKDIR /app/backend
 
 # Install build dependencies for native modules (sqlite3, bcrypt)
-RUN apk add --no-cache python3 make g++
+# py3-setuptools provides distutils for Python 3.12+ compatibility with node-gyp
+RUN apk add --no-cache python3 py3-setuptools make g++
 
 # Copy backend package files first (better caching)
 COPY server/package*.json ./

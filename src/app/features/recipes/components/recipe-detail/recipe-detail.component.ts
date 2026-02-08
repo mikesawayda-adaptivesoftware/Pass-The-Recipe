@@ -166,8 +166,57 @@ import { Recipe, Ingredient, Instruction } from '../../../../core/models';
                 <mat-icon>shopping_basket</mat-icon>
                 Ingredients
               </h2>
+
+              <!-- Scaling Controls -->
+              <div class="scaling-controls">
+                <div class="scaling-tabs">
+                  <button mat-stroked-button 
+                          [class.active]="scalingMode() === 'multiplier'"
+                          (click)="scalingMode.set('multiplier')">
+                    Multiply Recipe
+                  </button>
+                  <button mat-stroked-button 
+                          [class.active]="scalingMode() === 'servings'"
+                          (click)="setServingsMode()"
+                          [disabled]="!recipe()?.servings"
+                          [matTooltip]="!recipe()?.servings ? 'Recipe has no serving size defined' : ''">
+                    Adjust Servings
+                  </button>
+                </div>
+                
+                @if (scalingMode() === 'multiplier') {
+                  <div class="multiplier-buttons">
+                    @for (mult of [1, 2, 3, 4]; track mult) {
+                      <button mat-mini-fab 
+                              [class.selected]="multiplier() === mult"
+                              (click)="multiplier.set(mult)">
+                        {{ mult }}x
+                      </button>
+                    }
+                  </div>
+                } @else {
+                  <div class="servings-control">
+                    <button mat-icon-button (click)="decrementServings()" 
+                            [disabled]="customServings()! <= 1">
+                      <mat-icon>remove</mat-icon>
+                    </button>
+                    <span class="servings-display">{{ customServings() }} servings</span>
+                    <button mat-icon-button (click)="incrementServings()">
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  </div>
+                }
+
+                @if (effectiveMultiplier() !== 1) {
+                  <div class="scaling-indicator">
+                    <span class="scaling-badge">{{ effectiveMultiplier() | number:'1.0-2' }}x</span>
+                    <button mat-button color="primary" (click)="resetScaling()">Reset</button>
+                  </div>
+                }
+              </div>
+
               <div class="ingredients-list">
-                @for (group of ingredientsBySection(); track group.section) {
+                @for (group of scaledIngredientsBySection(); track group.section) {
                   @if (group.section) {
                     <div class="ingredient-section-header">{{ group.section }}</div>
                   }
@@ -176,8 +225,8 @@ import { Recipe, Ingredient, Instruction } from '../../../../core/models';
                       <li>
                         <mat-checkbox color="primary">
                           <span class="ingredient-text">
-                            @if (ingredient.quantity) {
-                              <strong>{{ formatQuantity(ingredient.quantity) }}</strong>
+                            @if (ingredient.scaledQuantity !== undefined) {
+                              <strong>{{ formatQuantity(ingredient.scaledQuantity) }}</strong>
                             }
                             @if (ingredient.unit) {
                               {{ ingredient.unit }}
@@ -455,6 +504,103 @@ import { Recipe, Ingredient, Instruction } from '../../../../core/models';
       }
     }
 
+    .scaling-controls {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .scaling-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+
+      button {
+        flex: 1;
+        font-size: 0.85rem;
+        
+        &.active {
+          background: #e94560;
+          color: white;
+          border-color: #e94560;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+        }
+      }
+    }
+
+    .multiplier-buttons {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+
+      button {
+        background: white;
+        color: #1a1a2e;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+
+        &.selected {
+          background: #e94560;
+          color: white;
+        }
+
+        &:hover:not(.selected) {
+          background: #f0f0f0;
+        }
+      }
+    }
+
+    .servings-control {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+
+      button {
+        background: white;
+        border: 1px solid #ddd;
+        
+        &:hover:not(:disabled) {
+          background: #f0f0f0;
+        }
+
+        &:disabled {
+          opacity: 0.4;
+        }
+      }
+    }
+
+    .servings-display {
+      font-weight: 500;
+      min-width: 100px;
+      text-align: center;
+      font-size: 1rem;
+      color: #1a1a2e;
+    }
+
+    .scaling-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .scaling-badge {
+      background: #e94560;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
     .ingredients-list {
       ul {
         list-style: none;
@@ -625,6 +771,25 @@ export class RecipeDetailComponent implements OnInit {
   togglingFavorite = signal(false);
   shoppingLists = signal<Array<{ id: string; name: string }>>([]);
 
+  // Scaling state
+  scalingMode = signal<'multiplier' | 'servings'>('multiplier');
+  multiplier = signal<number>(1);  // For 1x, 2x, 3x, 4x mode
+  customServings = signal<number | null>(null);  // For serving-based scaling
+
+  // Calculate the effective multiplier based on scaling mode
+  effectiveMultiplier = computed(() => {
+    if (this.scalingMode() === 'multiplier') {
+      return this.multiplier();
+    } else {
+      const originalServings = this.recipe()?.servings;
+      const targetServings = this.customServings();
+      if (originalServings && targetServings) {
+        return targetServings / originalServings;
+      }
+      return 1;
+    }
+  });
+
   // Group ingredients by section for display
   ingredientsBySection = computed(() => {
     const ingredients = this.recipe()?.ingredients || [];
@@ -654,6 +819,20 @@ export class RecipeDetailComponent implements OnInit {
     }
 
     return groups;
+  });
+
+  // Scaled ingredients by section - applies the effective multiplier to quantities
+  scaledIngredientsBySection = computed(() => {
+    const groups = this.ingredientsBySection();
+    const mult = this.effectiveMultiplier();
+    
+    return groups.map(group => ({
+      section: group.section,
+      ingredients: group.ingredients.map(ing => ({
+        ...ing,
+        scaledQuantity: this.scaleQuantity(ing.quantity, mult)
+      }))
+    }));
   });
 
   // Group instructions by section for display (step numbers restart for each section)
@@ -872,6 +1051,61 @@ export class RecipeDetailComponent implements OnInit {
 
   goBack(): void {
     this.location.back();
+  }
+
+  // Scale a quantity by the given multiplier
+  scaleQuantity(quantity: number | string | undefined, multiplier: number): number | string | undefined {
+    if (quantity === undefined) return undefined;
+    if (multiplier === 1) return quantity; // No scaling needed
+    
+    if (typeof quantity === 'number') {
+      return quantity * multiplier;
+    }
+    
+    // Handle string ranges like "3-4"
+    const rangeMatch = quantity.match(/^(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)$/);
+    if (rangeMatch) {
+      const low = parseFloat(rangeMatch[1]) * multiplier;
+      const high = parseFloat(rangeMatch[2]) * multiplier;
+      return `${this.formatQuantity(low)}-${this.formatQuantity(high)}`;
+    }
+    
+    // Try to parse as a simple number string
+    const numValue = parseFloat(quantity);
+    if (!isNaN(numValue)) {
+      return numValue * multiplier;
+    }
+    
+    return quantity; // Return as-is if not parseable
+  }
+
+  // Switch to servings mode and initialize customServings
+  setServingsMode(): void {
+    this.scalingMode.set('servings');
+    const originalServings = this.recipe()?.servings;
+    if (originalServings && this.customServings() === null) {
+      this.customServings.set(originalServings);
+    }
+  }
+
+  // Increment custom servings
+  incrementServings(): void {
+    const current = this.customServings() || this.recipe()?.servings || 1;
+    this.customServings.set(current + 1);
+  }
+
+  // Decrement custom servings (minimum 1)
+  decrementServings(): void {
+    const current = this.customServings() || this.recipe()?.servings || 1;
+    if (current > 1) {
+      this.customServings.set(current - 1);
+    }
+  }
+
+  // Reset scaling to default (1x)
+  resetScaling(): void {
+    this.multiplier.set(1);
+    this.customServings.set(this.recipe()?.servings || null);
   }
 }
 
